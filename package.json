@@ -1,0 +1,54 @@
+{
+  "name": "@wajub/node",
+  "version": "1.1.0",
+  "description": "Official Wajub Node.js SDK — server-side payments, webhooks, and merchant API",
+  "license": "MIT",
+  "author": "Wajub",
+  "homepage": "https://wajub.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wajubhq/wajub-node"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest run --watch"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "wajub",
+    "payments",
+    "checkout",
+    "mobile-money",
+    "africa",
+    "webhooks"
+  ],
+  "devDependencies": {
+    "@types/node": "^26.1.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.10"
+  }
+}
