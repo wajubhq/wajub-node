@@ -7,6 +7,11 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.1.1] — 2026-08-09
+
+### Changed
+- Removed an internal API-surface note from the README that wasn't meant for public docs.
+
 ## [1.1.0] — 2026-08-09
 
 ### Added
@@ -56,5 +61,6 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Full TypeScript support — strict types, no `any` in public API surface.
 - ESM-only build targeting Node.js 18 + modern Edge runtimes.
 
+[1.1.1]: https://github.com/wajubhq/wajub-node/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/wajubhq/wajub-node/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/wajubhq/wajub-node/releases/tag/v1.0.0

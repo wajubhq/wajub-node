@@ -8,8 +8,6 @@ Official **server-side** SDK for the [Wajub merchant API](https://docs.wajub.com
 
 Use **`@wajub/js`** (+ `@wajub/react`) in the browser. Use **`@wajub/node`** on your backend with a secret (`sk_`) or restricted (`rk_`) API key — never expose secret keys in client-side code.
 
-`@wajub/node` covers the **merchant API** (`sk_`). It does not wrap checkout session endpoints (`/pay/*`), public link checkout (`/q/*`, `/i/*`), or sandbox simulation — those belong to `@wajub/js` or direct HTTP during the payment flow.
-
 ## Features
 
 - Resource-oriented API (`wajub.payments`, `wajub.customers`, …)
