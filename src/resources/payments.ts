@@ -29,16 +29,6 @@ export class PaymentsResource extends BaseClient {
     return toPaymentObject(res);
   }
 
-  /** Alias for `create` — `POST /payments/initialize`. */
-  async initialize(params: CreatePaymentParams, options?: RequestOptions): Promise<PaymentObject> {
-    const { idempotencyKey, ...rest } = params;
-    const res = await this.post("/payments/initialize", rest as Record<string, unknown>, {
-      ...options,
-      idempotencyKey: options?.idempotencyKey ?? idempotencyKey,
-    });
-    return toPaymentObject(res);
-  }
-
   async retrieve(id: string): Promise<PaymentObject> {
     const res = await this.get(`/payments/${encodeURIComponent(id)}`);
     return pickResource<PaymentObject>(res, "transaction");

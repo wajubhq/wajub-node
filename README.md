@@ -75,7 +75,7 @@ Test mode is selected by your API key prefix (`sk_test.…`), not by the API URL
 | Getter | Methods |
 |--------|---------|
 | `wajub.global` | `ping`, `channels`, `countries`, `currencies` |
-| `wajub.payments` | `create`, `initialize`, `retrieve`, `list`, `cancel`, `process`, `processSplit`, `listRefunds` |
+| `wajub.payments` | `create`, `retrieve`, `list`, `cancel`, `process`, `processSplit`, `listRefunds` |
 | `wajub.customers` | `create`, `retrieve`, `update`, `delete`, `list`, `block`, `unblock`, `activate`, `deactivate`, `listTaxIds`, `createTaxId`, `deleteTaxId` |
 | `wajub.refunds` | `create`, `retrieve`, `list` |
 | `wajub.transfers` | `create`, `retrieve`, `list` |
