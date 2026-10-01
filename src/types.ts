@@ -181,6 +181,22 @@ export interface ShieldObject {
 // Existing types (unchanged)
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * What a payment, a link or an invoice may be paid with. Every key is
+ * optional and narrows nothing when left out: by default the payer is offered
+ * every method the merchant can collect on.
+ */
+export interface PaymentAccept {
+  /** Only channels of these countries (ISO 3166-1 alpha-2). Cards and crypto are not tied to a country. */
+  countries?: string[];
+  /** Only these channels, e.g. `cm.mtn`; `cm.mobile` stands for every mobile operator of Cameroon. */
+  channels?: string[];
+  /** Only these kinds of channel, e.g. `mobile_money`, `card`. */
+  types?: string[];
+  /** `payment`: only channels settling in the payment's currency. `any` (default): converted when they differ. */
+  currencies?: "payment" | "any";
+}
+
 export interface CreatePaymentParams {
   amount: number;
   currency: string;
@@ -193,6 +209,8 @@ export interface CreatePaymentParams {
   callback?: string;
   expires_in?: number;
   bearer?: "merchant" | "customer";
+  /** Restrict the payment methods offered to the payer. */
+  accept?: PaymentAccept;
   customer_id?: string | null;
   customer?: string | {
     name?: string;
