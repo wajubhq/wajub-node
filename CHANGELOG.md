@@ -7,12 +7,19 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [1.6.0] — 2026-10-12
+## [2.0.0] — 2026-10-12
 
 Versions 1.2.0 to 1.5.0 were published from a tree that is not in this
-repository; 1.6.0 is built from this repository and carries the typed objects
+repository; 2.0.0 is built from this repository and carries the typed objects
 of 1.1.x (`PaymentObject`, `TransferObject`, …) where 1.5.0 returned plain
-records. `payments.initialize` is not part of it: call `create`.
+records. It is a major version because TypeScript code written against 1.5.0
+can meet new type errors.
+
+### Migrating from 1.5.0
+- Results are typed objects; read fields as before, but code that typed them as
+  `Record<string, unknown>` may need its annotations changed.
+- `payments.initialize` is gone: call `payments.create`.
+- `WebhookEvent` carries the type in `event`, not `type`.
 
 ### Fixed
 - **`webhooks.constructEvent()` keeps the replay window.** A tolerance that is
