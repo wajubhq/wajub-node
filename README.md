@@ -13,7 +13,8 @@ Use **`@wajub/js`** (+ `@wajub/react`) in the browser. Use **`@wajub/node`** on 
 - Resource-oriented API (`wajub.payments`, `wajub.customers`, …)
 - Automatic `Idempotency-Key` on mutating requests (override per call)
 - Typed errors per HTTP status
-- Automatic retries on 429 and 5xx (max 2, exponential backoff)
+- Automatic retries on 429, 5xx, timeouts and network errors (up to 3, exponential backoff; 30 s per attempt)
+- A `409` for an `Idempotency-Key` still being processed is retried with the same key (after 2, 4, then 8 s)
 - Page-based pagination with async iteration and `getNextPage()`
 - Webhook signature verification (HMAC-SHA256, timestamp tolerance)
 - Zero third-party runtime dependencies (stdlib only)
@@ -38,7 +39,7 @@ Amounts are passed in the **smallest currency unit** (e.g. cents for EUR/USD; wh
 import { Wajub } from "@wajub/node";
 
 const wajub = new Wajub({
-  secretKey: process.env.WAJUB_SECRET_KEY!,
+  apiKey: process.env.WAJUB_API_KEY!,
   // webhookSecret: process.env.WAJUB_WEBHOOK_SECRET,
 });
 
@@ -64,9 +65,11 @@ console.log(embed.authorization_token, embed.authorization_url);
 
 | Variable | Description |
 |----------|-------------|
-| `WAJUB_SECRET_KEY` / `WAJUB_API_KEY` | Secret or restricted API key (`sk_`, `sk_test.`, `rk_`, …) |
-| `WAJUB_WEBHOOK_SECRET` | Webhook signing secret (`whsec_`) for `constructEvent()` |
+| `WAJUB_API_KEY` | Secret or restricted API key (`sk_`, `sk_test.`, `rk_`, …), passed as `apiKey` |
+| `WAJUB_WEBHOOK_SECRET` | Webhook signing secret (`whsec_`), passed as `webhookSecret` for `constructEvent()` |
 | `WAJUB_API_URL` | Override API base URL (development/staging only — see below) |
+
+The SDK does not read the API key from the environment: pass it as `apiKey`. It falls back to `WAJUB_WEBHOOK_SECRET` when `webhookSecret` is not given, and reads `WAJUB_API_URL`.
 
 Test mode is selected by your API key prefix (`sk_test.…`), not by the API URL. Production calls always go to `https://api.wajub.com` unless `WAJUB_API_URL` is set.
 
@@ -112,7 +115,7 @@ const event = wajub.webhooks.constructEvent(
   req.headers["x-wajub-timestamp"] as string,
 );
 
-switch (event.type) {
+switch (event.event) {
   case "payment.succeeded":
     // fulfill order
     break;
@@ -146,6 +149,10 @@ if (firstPage.has_more) {
 ```ts
 await wajub.payments.create(params, { idempotencyKey: `order-${orderId}` });
 ```
+
+If a call times out and you send it again with the same key while the first one is still running,
+the API answers `409` with `errors.idempotency_key`. The SDK waits and asks again with the same key
+(after 2, 4, then 8 seconds), so you get the first request's result instead of an error.
 
 ## Error handling
 

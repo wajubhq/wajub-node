@@ -4,6 +4,8 @@ import {
   createIdempotencyKey,
   DEFAULT_TIMEOUT_MS,
   errorFromResponse,
+  idempotencyConflictDelay,
+  isIdempotencyKeyInProgress,
   isRetryable,
   MAX_RETRIES,
   normalizeApiKey,
@@ -98,13 +100,18 @@ export class BaseClient {
             ? err
             : (err as { httpStatus?: number }).httpStatus ?? 0;
 
-        if (isLast || !isRetryable(method, status as number | Error, !!idempotencyKey)) {
+        // The same key still being processed: the first request's answer is
+        // coming, ask again with the same key.
+        const keyInProgress = !!idempotencyKey && isIdempotencyKeyInProgress(err);
+
+        if (isLast || (!keyInProgress && !isRetryable(method, status as number | Error, !!idempotencyKey))) {
           throw err;
         }
 
         // Parse Retry-After header from WajubRateLimitError if present.
-        const retryAfterMs =
-          (err as { retryAfter?: number }).retryAfter !== undefined
+        const retryAfterMs = keyInProgress
+          ? idempotencyConflictDelay(attempt)
+          : (err as { retryAfter?: number }).retryAfter !== undefined
             ? (err as { retryAfter: number }).retryAfter * 1000
             : undefined;
 

@@ -28,7 +28,7 @@ export type { WajubConfig } from "./types.js";
  *
  * ```ts
  * import { Wajub } from "@wajub/node";
- * const wajub = new Wajub({ secretKey: process.env.WAJUB_SECRET_KEY! });
+ * const wajub = new Wajub({ apiKey: process.env.WAJUB_API_KEY! });
  * const payment = await wajub.payments.create({ amount: 15000, currency: "XAF" });
  * ```
  */

@@ -160,6 +160,23 @@ export function isRetryable(
   return hasIdempotencyKey;
 }
 
+/**
+ * Whether a failed call is the API's `409` for an `Idempotency-Key` whose first
+ * request is still running (`errors.idempotency_key`). It comes when a retry
+ * after a timeout arrives before the first request has finished: the answer is
+ * on its way, so the call is worth repeating with the same key. Every other
+ * `409` is a real refusal.
+ */
+export function isIdempotencyKeyInProgress(err: unknown): boolean {
+  if (!(err instanceof WajubError) || err.httpStatus !== 409) return false;
+  return err.errors !== undefined && Object.prototype.hasOwnProperty.call(err.errors, "idempotency_key");
+}
+
+/** Wait before repeating a call whose key is still being processed (ms): 2 s, 4 s, 8 s. */
+export function idempotencyConflictDelay(attempt: number): number {
+  return 2000 * Math.pow(2, attempt);
+}
+
 /** Compute retry delay with exponential backoff + jitter (ms). */
 export function retryDelay(attempt: number, retryAfterMs?: number): number {
   if (retryAfterMs !== undefined && retryAfterMs > 0) return retryAfterMs;

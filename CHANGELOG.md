@@ -7,6 +7,36 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [1.6.0] — 2026-10-12
+
+Versions 1.2.0 to 1.5.0 were published from a tree that is not in this
+repository; 1.6.0 is built from this repository and carries the typed objects
+of 1.1.x (`PaymentObject`, `TransferObject`, …) where 1.5.0 returned plain
+records. `payments.initialize` is not part of it: call `create`.
+
+### Fixed
+- **`webhooks.constructEvent()` keeps the replay window.** A tolerance that is
+  not a positive number (a secret passed by mistake in its place, `NaN`, `0`)
+  switched the timestamp check off, so a replayed delivery was accepted. It now
+  falls back to 300 seconds, like the other SDKs.
+- **A missing `X-Wajub-Signature` or `X-Wajub-Timestamp` header** raises
+  `WebhookSignatureVerificationError` instead of a `TypeError`, so your handler
+  answers 400, not 500.
+- **`WebhookEvent` describes what the API sends:** `id`, `event` (the type),
+  `data`, `created`, `livemode`, `pending_webhooks`, `api_version`, `request`.
+  It declared `type`, which deliveries never carry: read `event.event`.
+- **Payment expiry:** `CreatePaymentParams` gains `expires: { in: minutes }`,
+  the field the API reads. The old `expires_in` was ignored by the API; the SDK
+  now sends it as `expires.in`.
+
+### Changed
+- **A `409` for an `Idempotency-Key` still being processed is retried.** A
+  call sent again after a timeout can reach the API while the first one is
+  still running; the API answers `409` with `errors.idempotency_key`. The SDK
+  now waits 2, 4, then 8 seconds and asks again with the same key, within its
+  usual 3 retries, and returns the first request's result. Every other `409`
+  is still raised at once.
+
 ## [1.1.1] — 2026-08-09
 
 ### Changed

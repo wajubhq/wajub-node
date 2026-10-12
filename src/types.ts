@@ -207,6 +207,12 @@ export interface CreatePaymentParams {
   description?: string;
   /** Redirect checkout only — omit for inline / overlay embed. */
   callback?: string;
+  /** How long the payment stays open: `{ in: minutes }`, 5 to 43 200 (default 1 440, a day). */
+  expires?: { in?: number };
+  /**
+   * @deprecated The API reads `expires.in`. Kept so existing calls still work:
+   * the SDK sends it as `expires.in` when `expires` is not set.
+   */
   expires_in?: number;
   bearer?: "merchant" | "customer";
   /** Restrict the payment methods offered to the payer. */
@@ -264,9 +270,22 @@ export interface PaymentListParams {
   amount_max?: number;
 }
 
+/** A webhook delivery as the API sends it. */
 export interface WebhookEvent {
-  type: string;
+  /** The event's id, `evt_…`: deduplicate on it. */
+  id: string;
+  /** The event type, for example `payment.succeeded`. */
+  event: string;
+  /** The object the event is about (payment, refund, transfer…). */
   data: Record<string, unknown>;
+  /** `false` for a sandbox event. */
+  livemode?: boolean;
+  pending_webhooks?: number;
+  api_version?: string | null;
+  request?: { id?: string | null; idempotency_key?: string | null };
+  /** When the event happened, ISO 8601. */
+  created?: string;
+  [key: string]: unknown;
 }
 
 export interface WajubConfig {

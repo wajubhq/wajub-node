@@ -21,7 +21,11 @@ function toPaymentObject(body: Record<string, unknown>): PaymentObject {
 
 export class PaymentsResource extends BaseClient {
   async create(params: CreatePaymentParams, options?: RequestOptions): Promise<PaymentObject> {
-    const { idempotencyKey, ...rest } = params;
+    const { idempotencyKey, expires_in, ...rest } = params;
+    // The API reads `expires.in`; `expires_in` is the old spelling of this type.
+    if (expires_in !== undefined && rest.expires === undefined) {
+      rest.expires = { in: expires_in };
+    }
     const res = await this.post("/payments", rest as Record<string, unknown>, {
       ...options,
       idempotencyKey: options?.idempotencyKey ?? idempotencyKey,

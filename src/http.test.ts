@@ -4,6 +4,7 @@ import {
   defaultApiUrl,
   errorFromResponse,
   isRetryable,
+  idempotencyConflictDelay,
   API_URL,
 } from "./http-utils.js";
 import { WajubApiError } from "./errors.js";
@@ -220,6 +221,73 @@ describe("BaseClient retry behavior", () => {
 
     // The auto-assigned idempotency key makes the POST retryable.
     expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
+// ─── 409 while the same Idempotency-Key is still being processed ─────────────
+//
+// A retry after a timeout can reach the API while the first request is still
+// running: the API answers 409 with `errors.idempotency_key`. That is a wait,
+// not a failure, so the SDK tries again with the same key.
+
+describe("BaseClient retry on a 409 for an Idempotency-Key in progress", () => {
+  let fetchMock: ReturnType<typeof vi.fn>;
+  const inProgress = {
+    code: 409,
+    status: "Conflict",
+    message: "A request with this Idempotency-Key is still being processed.",
+    errors: { idempotency_key: ["A request with this Idempotency-Key is still being processed."] },
+  };
+
+  beforeEach(() => {
+    fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it("tries again with the same key and returns what the first request produced", async () => {
+    fetchMock
+      .mockResolvedValueOnce(makeResponse(409, inProgress))
+      .mockResolvedValueOnce(makeResponse(201, { transaction: { id: "trx_1" } }));
+
+    const client = new BaseClient("sk_test.key", "https://api.example.com");
+    const result = await client.post("/payments", { amount: 100 }, { idempotencyKey: "ORDER-42" });
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result).toEqual({ transaction: { id: "trx_1" } });
+    const keys = fetchMock.mock.calls.map(([, init]) => (init.headers as Record<string, string>)["Idempotency-Key"]);
+    expect(keys).toEqual(["ORDER-42", "ORDER-42"]);
+  });
+
+  it("gives up after the usual number of retries", async () => {
+    fetchMock.mockResolvedValue(makeResponse(409, inProgress));
+
+    const client = new BaseClient("sk_test.key", "https://api.example.com");
+
+    await expect(client.post("/payments", { amount: 100 })).rejects.toBeInstanceOf(WajubApiError);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
+  });
+
+  it("does not retry any other 409", async () => {
+    fetchMock.mockResolvedValue(
+      makeResponse(409, {
+        code: 409,
+        error_code: "payment_in_progress",
+        message: "A charge is already in progress for this payment.",
+      }),
+    );
+
+    const client = new BaseClient("sk_test.key", "https://api.example.com");
+
+    await expect(client.post("/payments/trx_1", { channel: "cm.mtn" })).rejects.toBeInstanceOf(WajubApiError);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits 2, 4 then 8 seconds between those retries", () => {
+    expect([0, 1, 2].map((attempt) => idempotencyConflictDelay(attempt))).toEqual([2000, 4000, 8000]);
   });
 });
 

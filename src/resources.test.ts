@@ -34,3 +34,18 @@ describe("createResource pagination", () => {
     getSpy.mockRestore();
   });
 });
+
+describe("PaymentsResource.create expiry", () => {
+  it("sends expires.in, and turns the old expires_in into it", async () => {
+    const { PaymentsResource } = await import("./resources/payments.js");
+    const payments = new PaymentsResource("sk_test.key", "https://api.wajub.test");
+    const postSpy = vi.spyOn(payments, "post").mockResolvedValue({ transaction: { id: "trx_1" } });
+
+    await payments.create({ amount: 1000, currency: "XAF", email: "a@b.c", expires: { in: 60 } });
+    await payments.create({ amount: 1000, currency: "XAF", email: "a@b.c", expires_in: 30 });
+
+    expect(postSpy.mock.calls[0]?.[1]).toMatchObject({ expires: { in: 60 } });
+    expect(postSpy.mock.calls[1]?.[1]).toMatchObject({ expires: { in: 30 } });
+    expect(postSpy.mock.calls[1]?.[1]).not.toHaveProperty("expires_in");
+  });
+});
