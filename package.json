@@ -1,6 +1,6 @@
 {
   "name": "@wajub/node",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Official Wajub Node.js SDK — server-side payments, webhooks, and merchant API",
   "license": "MIT",
   "author": "Wajub",

@@ -7,7 +7,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
-## [Unreleased]
+## [2.1.0] — 2026-10-15
 
 ### Deprecated
 - **`listen.config()` and `listen.auth()`.** The API no longer offers them. To
