@@ -21,6 +21,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   receive webhooks on your machine, forward them with the Wajub CLI:
   `wajub listen`. Your editor marks them as deprecated, and Node prints a
   `DeprecationWarning` the first time each one is called.
+- **The `theming` parameter of `payments.create()`.** It has no effect: the
+  payment page shows your account's branding, set in the Wajub Dashboard.
+  Your editor marks it as deprecated; remove it from your calls.
 
 ### Fixed
 - **The package includes its `LICENSE` file** (MIT), which it lacked.
