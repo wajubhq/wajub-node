@@ -6,7 +6,7 @@
 
 Official **server-side** SDK for the [Wajub merchant API](https://docs.wajub.com). Accept mobile-money and card payments across Africa with a Stripe-inspired, resource-oriented client.
 
-Use **`@wajub/js`** (+ `@wajub/react`) in the browser. Use **`@wajub/node`** on your backend with a secret (`sk_`) or restricted (`rk_`) API key — never expose secret keys in client-side code.
+Use **`@wajub/js`** (+ `@wajub/react`) in the browser. Use **`@wajub/node`** on your backend with a secret (`sk.…`, `sk_test.…`) or restricted (`rk.…`, `rk_test.…`) API key — never expose secret keys in client-side code.
 
 ## Features
 
@@ -65,13 +65,13 @@ console.log(embed.authorization_token, embed.authorization_url);
 
 | Variable | Description |
 |----------|-------------|
-| `WAJUB_API_KEY` | Secret or restricted API key (`sk_`, `sk_test.`, `rk_`, …), passed as `apiKey` |
+| `WAJUB_API_KEY` | Secret or restricted API key (`sk.…`, `sk_test.…`, `rk.…`, `rk_test.…`), passed as `apiKey` |
 | `WAJUB_WEBHOOK_SECRET` | Webhook signing secret (`whsec_`), passed as `webhookSecret` for `constructEvent()` |
 | `WAJUB_API_URL` | Override API base URL (development/staging only — see below) |
 
 The SDK does not read the API key from the environment: pass it as `apiKey`. It falls back to `WAJUB_WEBHOOK_SECRET` when `webhookSecret` is not given, and reads `WAJUB_API_URL`.
 
-Test mode is selected by your API key prefix (`sk_test.…`), not by the API URL. Production calls always go to `https://api.wajub.com` unless `WAJUB_API_URL` is set.
+Test mode is selected by your API key: a `_test.` key (`sk_test.…`, `rk_test.…`) works in sandbox, the others in live.
 
 ## Resources (merchant API)
 
