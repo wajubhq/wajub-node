@@ -9,6 +9,13 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [2.1.0] — 2026-10-15
 
+### Changed
+- **An id that contains `/`, or is empty, `.` or `..`, is refused with a
+  `TypeError` before anything is sent.** Such an id reached another route:
+  `payments.retrieve("pay_1/refunds")` listed refunds, and
+  `customers.delete("cus_1/tax_ids/txi_1")` deleted a tax id. No Wajub id takes
+  these forms, so a valid call is unchanged.
+
 ### Deprecated
 - **`listen.config()` and `listen.auth()`.** The API no longer offers them. To
   receive webhooks on your machine, forward them with the Wajub CLI:

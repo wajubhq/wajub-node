@@ -5,7 +5,7 @@ import type {
   RequestOptions,
 } from "../types.js";
 import { BaseClient } from "../http.js";
-import { pickList, pickResource } from "../http-utils.js";
+import { pathSegment, pickList, pickResource } from "../http-utils.js";
 import { createPagedList, type PagedResult } from "./pagination.js";
 
 function toPaymentObject(body: Record<string, unknown>): PaymentObject {
@@ -34,7 +34,7 @@ export class PaymentsResource extends BaseClient {
   }
 
   async retrieve(id: string): Promise<PaymentObject> {
-    const res = await this.get(`/payments/${encodeURIComponent(id)}`);
+    const res = await this.get(`/payments/${pathSegment(id)}`);
     return pickResource<PaymentObject>(res, "transaction");
   }
 
@@ -44,25 +44,25 @@ export class PaymentsResource extends BaseClient {
 
   /** Cancel a pending payment (`DELETE /payments/{uid}`). */
   async cancel(id: string, options?: RequestOptions): Promise<PaymentObject> {
-    const res = await this.del(`/payments/${encodeURIComponent(id)}`, options);
+    const res = await this.del(`/payments/${pathSegment(id)}`, options);
     return pickResource<PaymentObject>(res, "transaction");
   }
 
   /** Charge / process a payment (`POST /payments/{uid}`). */
   async process(id: string, params: Record<string, unknown>, options?: RequestOptions) {
-    const res = await this.post(`/payments/${encodeURIComponent(id)}`, params, options);
+    const res = await this.post(`/payments/${pathSegment(id)}`, params, options);
     return pickResource<Record<string, unknown>>(res, "transaction");
   }
 
   /** Process a split installment (`POST /payments/{uid}/splits`). */
   async processSplit(id: string, params: Record<string, unknown>, options?: RequestOptions) {
-    const res = await this.post(`/payments/${encodeURIComponent(id)}/splits`, params, options);
+    const res = await this.post(`/payments/${pathSegment(id)}/splits`, params, options);
     return pickResource<Record<string, unknown>>(res, "transaction");
   }
 
   /** List refunds for a payment (`GET /payments/{uid}/refunds`). */
   async listRefunds(id: string, params?: Record<string, unknown>) {
-    const res = await this.get(`/payments/${encodeURIComponent(id)}/refunds`, params);
+    const res = await this.get(`/payments/${pathSegment(id)}/refunds`, params);
     return pickList<Record<string, unknown>>(res, "refunds");
   }
 }

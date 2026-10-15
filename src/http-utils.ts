@@ -40,6 +40,22 @@ export function defaultApiUrl(): string {
   return API_URL;
 }
 
+/**
+ * An id as one segment of a request path. The API reads an encoded "/" as a
+ * separator, and URLs resolve "." and ".." segments, so such an id, or an empty
+ * one, would reach another route. No Wajub id takes these forms: it is refused
+ * before anything is sent.
+ */
+export function pathSegment(id: string): string {
+  const value = String(id);
+  if (value.includes("/") || value === "" || value === "." || value === "..") {
+    throw new TypeError(
+      `Wajub: ${JSON.stringify(value)} is not a Wajub id: an id is never empty, "." or "..", and must not contain "/"`,
+    );
+  }
+  return encodeURIComponent(value);
+}
+
 export function createIdempotencyKey(prefix = "wajub"): string {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return `${prefix}-${crypto.randomUUID()}`;

@@ -1,6 +1,6 @@
 import type { RequestOptions } from "../types.js";
 import { BaseClient } from "../http.js";
-import { pickList, pickResource } from "../http-utils.js";
+import { pathSegment, pickList, pickResource } from "../http-utils.js";
 import { createPagedList, type PagedResult } from "./pagination.js";
 
 export class TaxResource extends BaseClient {
@@ -35,7 +35,7 @@ export class TaxResource extends BaseClient {
   }
 
   async retrieveCode(code: string) {
-    const res = await this.get(`/tax/codes/${encodeURIComponent(code)}`);
+    const res = await this.get(`/tax/codes/${pathSegment(code)}`);
     return pickResource<Record<string, unknown>>(res, "tax_code", "code");
   }
 
@@ -49,17 +49,17 @@ export class TaxResource extends BaseClient {
   }
 
   async retrieveRegistration(id: string) {
-    const res = await this.get(`/tax/registrations/${encodeURIComponent(id)}`);
+    const res = await this.get(`/tax/registrations/${pathSegment(id)}`);
     return pickResource<Record<string, unknown>>(res, "registration", "tax_registration");
   }
 
   async updateRegistration(id: string, params: Record<string, unknown>, options?: RequestOptions) {
-    const res = await this.put(`/tax/registrations/${encodeURIComponent(id)}`, params, options);
+    const res = await this.put(`/tax/registrations/${pathSegment(id)}`, params, options);
     return pickResource<Record<string, unknown>>(res, "registration", "tax_registration");
   }
 
   async deleteRegistration(id: string, options?: RequestOptions) {
-    await this.del(`/tax/registrations/${encodeURIComponent(id)}`, options);
+    await this.del(`/tax/registrations/${pathSegment(id)}`, options);
   }
 
   async jurisdictions(params?: Record<string, unknown>) {
