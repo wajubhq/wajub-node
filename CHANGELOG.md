@@ -22,6 +22,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `wajub listen`. Your editor marks them as deprecated, and Node prints a
   `DeprecationWarning` the first time each one is called.
 
+### Fixed
+- **The package includes its `LICENSE` file** (MIT), which it lacked.
+
 ## [2.0.0] — 2026-10-12
 
 Results are typed objects again (`PaymentObject`, `TransferObject`, …) where
