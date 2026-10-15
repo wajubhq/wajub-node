@@ -7,6 +7,14 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [Unreleased]
+
+### Deprecated
+- **`listen.config()` and `listen.auth()`.** The API no longer offers them. To
+  receive webhooks on your machine, forward them with the Wajub CLI:
+  `wajub listen`. Your editor marks them as deprecated, and Node prints a
+  `DeprecationWarning` the first time each one is called.
+
 ## [2.0.0] — 2026-10-12
 
 Results are typed objects again (`PaymentObject`, `TransferObject`, …) where
