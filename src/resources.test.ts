@@ -61,18 +61,20 @@ describe("ListenResource", () => {
     const postSpy = vi.spyOn(listen, "post").mockResolvedValue({ auth: { token: "tok" } });
     const warnSpy = vi.spyOn(process, "emitWarning").mockImplementation(() => {});
 
-    expect(await listen.config()).toEqual({ host: "example" });
-    expect(await listen.config()).toEqual({ host: "example" });
-    expect(await listen.auth({ channel: "x" })).toEqual({ token: "tok" });
+    try {
+      expect(await listen.config()).toEqual({ host: "example" });
+      expect(await listen.config()).toEqual({ host: "example" });
+      expect(await listen.auth({ channel: "x" })).toEqual({ token: "tok" });
 
-    expect(getSpy).toHaveBeenCalledWith("/listen/config");
-    expect(postSpy).toHaveBeenCalledWith("/listen/auth", { channel: "x" }, undefined);
-    expect(warnSpy).toHaveBeenCalledTimes(2);
-    expect(warnSpy.mock.calls[0]?.[0]).toMatch(/listen\.config\(\) is deprecated.*wajub listen/);
-    expect(warnSpy.mock.calls[0]?.[1]).toMatchObject({ type: "DeprecationWarning", code: "WAJUB_LISTEN_CONFIG" });
-    expect(warnSpy.mock.calls[1]?.[0]).toMatch(/listen\.auth\(\) is deprecated.*wajub listen/);
-    expect(warnSpy.mock.calls[1]?.[1]).toMatchObject({ type: "DeprecationWarning", code: "WAJUB_LISTEN_AUTH" });
-
-    warnSpy.mockRestore();
+      expect(getSpy).toHaveBeenCalledWith("/listen/config");
+      expect(postSpy).toHaveBeenCalledWith("/listen/auth", { channel: "x" }, undefined);
+      expect(warnSpy).toHaveBeenCalledTimes(2);
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/listen\.config\(\) is deprecated.*wajub listen/);
+      expect(warnSpy.mock.calls[0]?.[1]).toMatchObject({ type: "DeprecationWarning", code: "WAJUB_LISTEN_CONFIG" });
+      expect(warnSpy.mock.calls[1]?.[0]).toMatch(/listen\.auth\(\) is deprecated.*wajub listen/);
+      expect(warnSpy.mock.calls[1]?.[1]).toMatchObject({ type: "DeprecationWarning", code: "WAJUB_LISTEN_AUTH" });
+    } finally {
+      warnSpy.mockRestore();
+    }
   });
 });
