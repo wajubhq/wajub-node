@@ -9,24 +9,26 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [2.1.0] — 2026-10-15
 
-### Changed
-- **An id that contains `/`, or is empty, `.` or `..`, is refused with a
-  `TypeError` before anything is sent.** Such an id reached another route:
-  `payments.retrieve("pay_1/refunds")` listed refunds, and
-  `customers.delete("cus_1/tax_ids/txi_1")` deleted a tax id. No Wajub id takes
-  these forms, so a valid call is unchanged.
-
 ### Deprecated
 - **`listen.config()` and `listen.auth()`.** The API no longer offers them. To
   receive webhooks on your machine, forward them with the Wajub CLI:
   `wajub listen`. Your editor marks them as deprecated, and Node prints a
   `DeprecationWarning` the first time each one is called.
-- **The `theming` parameter of `payments.create()`.** It has no effect: the
-  payment page shows your account's branding, set in the Wajub Dashboard.
-  Your editor marks it as deprecated; remove it from your calls.
+- **The `theming` parameter of `payments.create()`.** Wajub ignores it on
+  create: the payment page shows your account's branding, set in the Wajub
+  Dashboard. Your editor marks it as deprecated; remove it from your calls.
 
 ### Fixed
 - **The package includes its `LICENSE` file** (MIT), which it lacked.
+- **TypeScript projects that `require()` the package get its CommonJS types.**
+  They were given the ES module types.
+
+### Security
+- **An id that is not a Wajub id is refused before anything is sent.** If an
+  id you pass can come from a URL or a form, a call could act on another
+  resource of your account: `customers.delete("cus_1/tax_ids/txi_1")` deleted
+  a tax ID. An id that is empty, `.` or `..`, or contains `/`, now throws a
+  `TypeError`. Wajub ids never take these forms, so valid calls are unchanged.
 
 ## [2.0.0] — 2026-10-12
 

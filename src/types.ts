@@ -229,8 +229,8 @@ export interface CreatePaymentParams {
   shipping?: AddressInput;
   items?: { name?: string; description?: string; quantity?: number; unit_price?: number }[];
   /**
-   * @deprecated Has no effect: the payment page shows your account's branding,
-   * set in the Wajub Dashboard. Kept so existing calls still compile.
+   * @deprecated Ignored on create: the payment page shows your account's
+   * branding, set in the Wajub Dashboard. Kept so existing calls still compile.
    */
   theming?: { primary_color?: string; logo_url?: string };
   metadata?: Record<string, unknown>;
