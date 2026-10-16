@@ -27,8 +27,9 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **An id that is not a Wajub id is refused before anything is sent.** If an
   id you pass can come from a URL or a form, a call could act on another
   resource of your account: `customers.delete("cus_1/tax_ids/txi_1")` deleted
-  a tax ID. An id that is empty, `.` or `..`, or contains `/`, now throws a
-  `TypeError`. Wajub ids never take these forms, so valid calls are unchanged.
+  a tax ID. A call with an id that is empty, `.` or `..`, or contains `/`, now
+  rejects with a `TypeError`. Wajub ids never take these forms, so valid calls
+  are unchanged.
 
 ## [2.0.0] — 2026-10-12
 
