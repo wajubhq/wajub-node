@@ -1,6 +1,6 @@
 import type { RequestOptions } from "../types.js";
 import { BaseClient } from "../http.js";
-import { pickList, pickResource } from "../http-utils.js";
+import { pathSegment, pickList, pickResource } from "../http-utils.js";
 
 export class ShieldResource extends BaseClient {
   async getSettings() {
@@ -29,6 +29,6 @@ export class ShieldResource extends BaseClient {
   }
 
   async removeFromBlocklist(id: string, options?: RequestOptions) {
-    await this.del(`/shield/blocklist/${encodeURIComponent(id)}`, options);
+    await this.del(`/shield/blocklist/${pathSegment(id)}`, options);
   }
 }

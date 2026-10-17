@@ -1,6 +1,6 @@
 import type { RequestOptions } from "../types.js";
 import { BaseClient } from "../http.js";
-import { pickResource } from "../http-utils.js";
+import { pathSegment, pickResource } from "../http-utils.js";
 import { createPagedList, type PagedResult } from "./pagination.js";
 
 export interface ResourceKeys {
@@ -21,7 +21,7 @@ export function createResource<T extends Record<string, unknown>>(keys: Resource
     }
 
     async retrieve(id: string): Promise<T> {
-      const res = await this.get(`/${keys.path}/${encodeURIComponent(id)}`);
+      const res = await this.get(`/${keys.path}/${pathSegment(id)}`);
       return pickResource<T>(res, keys.singular);
     }
 
@@ -30,12 +30,12 @@ export function createResource<T extends Record<string, unknown>>(keys: Resource
     }
 
     async update(id: string, params: Record<string, unknown>, options?: RequestOptions): Promise<T> {
-      const res = await this.put(`/${keys.path}/${encodeURIComponent(id)}`, params, options);
+      const res = await this.put(`/${keys.path}/${pathSegment(id)}`, params, options);
       return pickResource<T>(res, keys.singular);
     }
 
     async delete(id: string, options?: RequestOptions): Promise<void> {
-      await this.del(`/${keys.path}/${encodeURIComponent(id)}`, options);
+      await this.del(`/${keys.path}/${pathSegment(id)}`, options);
     }
   };
 }

@@ -11,7 +11,7 @@ import type {
   WebhookEndpointObject,
 } from "../types.js";
 import { BaseClient } from "../http.js";
-import { pickResource } from "../http-utils.js";
+import { pathSegment, pickResource } from "../http-utils.js";
 import { createPagedList } from "./pagination.js";
 import { createResource } from "./resource-factory.js";
 
@@ -52,17 +52,17 @@ export class InvoicesResource extends InvoicesBase {
   }
 
   async send(id: string, options?: RequestOptions): Promise<InvoiceObject> {
-    const res = await this.post(`/invoices/${encodeURIComponent(id)}/send`, undefined, options);
+    const res = await this.post(`/invoices/${pathSegment(id)}/send`, undefined, options);
     return pickResource<InvoiceObject>(res, "invoice");
   }
 
   async markPaid(id: string, params?: Record<string, unknown>, options?: RequestOptions): Promise<InvoiceObject> {
-    const res = await this.post(`/invoices/${encodeURIComponent(id)}/mark-paid`, params, options);
+    const res = await this.post(`/invoices/${pathSegment(id)}/mark-paid`, params, options);
     return pickResource<InvoiceObject>(res, "invoice");
   }
 
   async cancel(id: string, options?: RequestOptions): Promise<InvoiceObject> {
-    const res = await this.post(`/invoices/${encodeURIComponent(id)}/cancel`, undefined, options);
+    const res = await this.post(`/invoices/${pathSegment(id)}/cancel`, undefined, options);
     return pickResource<InvoiceObject>(res, "invoice");
   }
 }
@@ -88,12 +88,12 @@ export class EventsResource extends BaseClient {
   }
 
   async retrieve(id: string): Promise<EventObject> {
-    const res = await this.get(`/events/${encodeURIComponent(id)}`);
+    const res = await this.get(`/events/${pathSegment(id)}`);
     return pickResource<EventObject>(res, "event");
   }
 
   async resend(id: string, options?: RequestOptions): Promise<EventObject> {
-    const res = await this.post(`/events/${encodeURIComponent(id)}/resend`, undefined, options);
+    const res = await this.post(`/events/${pathSegment(id)}/resend`, undefined, options);
     return pickResource<EventObject>(res, "event");
   }
 }
@@ -106,7 +106,7 @@ export class AccountsResource extends AccountsBase {
   }
 
   async regenerateToken(id: string, options?: RequestOptions): Promise<AccountObject> {
-    const res = await this.post(`/accounts/${encodeURIComponent(id)}/token`, undefined, options);
+    const res = await this.post(`/accounts/${pathSegment(id)}/token`, undefined, options);
     return pickResource<AccountObject>(res, "account");
   }
 }
@@ -119,7 +119,7 @@ export class WebhookEndpointsResource extends WebhooksBase {
   }
 
   async rotateSecret(id: string, options?: RequestOptions): Promise<WebhookEndpointObject> {
-    const res = await this.post(`/webhooks/${encodeURIComponent(id)}/rotate-secret`, undefined, options);
+    const res = await this.post(`/webhooks/${pathSegment(id)}/rotate-secret`, undefined, options);
     return pickResource<WebhookEndpointObject>(res, "endpoint");
   }
 }

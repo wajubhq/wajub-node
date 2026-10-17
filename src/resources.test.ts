@@ -49,3 +49,32 @@ describe("PaymentsResource.create expiry", () => {
     expect(postSpy.mock.calls[1]?.[1]).not.toHaveProperty("expires_in");
   });
 });
+
+describe("ListenResource", () => {
+  // The API no longer offers /listen/config and /listen/auth: both methods are
+  // deprecated in favour of the Wajub CLI's `wajub listen`, and still send the
+  // same request.
+  it("warns once per method that config and auth are deprecated, and still sends them", async () => {
+    const { ListenResource } = await import("./resources/listen.js");
+    const listen = new ListenResource("sk_test.key", "https://api.wajub.test");
+    const getSpy = vi.spyOn(listen, "get").mockResolvedValue({ config: { host: "example" } });
+    const postSpy = vi.spyOn(listen, "post").mockResolvedValue({ auth: { token: "tok" } });
+    const warnSpy = vi.spyOn(process, "emitWarning").mockImplementation(() => {});
+
+    try {
+      expect(await listen.config()).toEqual({ host: "example" });
+      expect(await listen.config()).toEqual({ host: "example" });
+      expect(await listen.auth({ channel: "x" })).toEqual({ token: "tok" });
+
+      expect(getSpy).toHaveBeenCalledWith("/listen/config");
+      expect(postSpy).toHaveBeenCalledWith("/listen/auth", { channel: "x" }, undefined);
+      expect(warnSpy).toHaveBeenCalledTimes(2);
+      expect(warnSpy.mock.calls[0]?.[0]).toMatch(/listen\.config\(\) is deprecated.*wajub listen/);
+      expect(warnSpy.mock.calls[0]?.[1]).toMatchObject({ type: "DeprecationWarning", code: "WAJUB_LISTEN_CONFIG" });
+      expect(warnSpy.mock.calls[1]?.[0]).toMatch(/listen\.auth\(\) is deprecated.*wajub listen/);
+      expect(warnSpy.mock.calls[1]?.[1]).toMatchObject({ type: "DeprecationWarning", code: "WAJUB_LISTEN_AUTH" });
+    } finally {
+      warnSpy.mockRestore();
+    }
+  });
+});

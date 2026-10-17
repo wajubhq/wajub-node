@@ -1,6 +1,6 @@
 {
   "name": "@wajub/node",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Official Wajub Node.js SDK — server-side payments, webhooks, and merchant API",
   "license": "MIT",
   "author": "Wajub",
@@ -15,14 +15,20 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsup",

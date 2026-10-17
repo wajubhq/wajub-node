@@ -7,13 +7,35 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.1.0] — 2026-10-15
+
+### Deprecated
+- **`listen.config()` and `listen.auth()`.** The API no longer offers them. To
+  receive webhooks on your machine, forward them with the Wajub CLI:
+  `wajub listen`. Your editor marks them as deprecated, and Node prints a
+  `DeprecationWarning` the first time each one is called.
+- **The `theming` parameter of `payments.create()`.** Wajub ignores it on
+  create: the payment page shows your account's branding, set in the Wajub
+  Dashboard. Your editor marks it as deprecated; remove it from your calls.
+
+### Fixed
+- **The package includes its `LICENSE` file** (MIT), which it lacked.
+- **TypeScript projects that `require()` the package get its CommonJS types.**
+  They were given the ES module types.
+
+### Security
+- **An id that is not a Wajub id is refused before anything is sent.** If an
+  id you pass can come from a URL or a form, a call could act on another
+  resource of your account: `customers.delete("cus_1/tax_ids/txi_1")` deleted
+  a tax ID. A call with an id that is empty, `.` or `..`, or contains `/`, now
+  rejects with a `TypeError`. Wajub ids never take these forms, so valid calls
+  are unchanged.
+
 ## [2.0.0] — 2026-10-12
 
-Versions 1.2.0 to 1.5.0 were published from a tree that is not in this
-repository; 2.0.0 is built from this repository and carries the typed objects
-of 1.1.x (`PaymentObject`, `TransferObject`, …) where 1.5.0 returned plain
-records. It is a major version because TypeScript code written against 1.5.0
-can meet new type errors.
+Results are typed objects again (`PaymentObject`, `TransferObject`, …) where
+1.5.0 returned plain records. It is a major version because TypeScript code
+written against 1.5.0 can meet new type errors.
 
 ### Migrating from 1.5.0
 - Results are typed objects; read fields as before, but code that typed them as
@@ -22,81 +44,63 @@ can meet new type errors.
 - `WebhookEvent` carries the type in `event`, not `type`.
 
 ### Fixed
-- **`webhooks.constructEvent()` keeps the replay window.** A tolerance that is
-  not a positive number (a secret passed by mistake in its place, `NaN`, `0`)
-  switched the timestamp check off, so a replayed delivery was accepted. It now
-  falls back to 300 seconds, like the other SDKs.
+- **`webhooks.constructEvent()` always checks the timestamp.** A tolerance that
+  is not a positive number (a secret passed by mistake in its place, `NaN`,
+  `0`) switched the check off, so a replayed delivery was accepted. Such a
+  value now keeps the default tolerance.
 - **A missing `X-Wajub-Signature` or `X-Wajub-Timestamp` header** raises
   `WebhookSignatureVerificationError` instead of a `TypeError`, so your handler
   answers 400, not 500.
-- **`WebhookEvent` describes what the API sends:** `id`, `event` (the type),
-  `data`, `created`, `livemode`, `pending_webhooks`, `api_version`, `request`.
-  It declared `type`, which deliveries never carry: read `event.event`.
-- **Payment expiry:** `CreatePaymentParams` gains `expires: { in: minutes }`,
-  the field the API reads. The old `expires_in` was ignored by the API; the SDK
-  now sends it as `expires.in`.
+- **`WebhookEvent` describes what a delivery carries:** `id`, `event` (the
+  type), `data`, `created`, `livemode`, `pending_webhooks`, `api_version`,
+  `request`. It declared `type`, which deliveries never carry: read
+  `event.event`.
+- **Payment expiry:** `CreatePaymentParams` gains `expires: { in: minutes }`.
+  An `expires_in` you already pass now takes effect too; it was ignored.
 
 ### Changed
-- **A `409` for an `Idempotency-Key` still being processed is retried.** A
-  call sent again after a timeout can reach the API while the first one is
-  still running; the API answers `409` with `errors.idempotency_key`. The SDK
-  now waits 2, 4, then 8 seconds and asks again with the same key, within its
-  usual 3 retries, and returns the first request's result. Every other `409`
-  is still raised at once.
+- **A create sent again with the same idempotency key while the first is still
+  running** now returns the first request's result instead of a `409` error.
 
 ## [1.1.1] — 2026-08-09
 
 ### Changed
-- Removed an internal API-surface note from the README that wasn't meant for public docs.
+- README corrections; no change to the package.
 
 ## [1.1.0] — 2026-08-09
 
 ### Added
-- **Retry logic** — `GET` and `DELETE` requests, plus `POST`/`PUT` with an
-  idempotency key, are automatically retried on transient failures (HTTP 429,
-  500, 502, 503, 504) using exponential back-off with jitter (up to 3
-  retries). `Retry-After` headers from 429 responses are honoured.
-- **`User-Agent` header** — every request now includes
-  `User-Agent: wajub-node/<version>` so server logs can distinguish SDK
-  traffic from direct HTTP calls. The version is injected at build time via
-  `tsup` define; falls back to `dev` in unit-test environments.
-- **`WAJUB_API_URL` environment variable** — set this variable to point the
-  SDK at a staging or locally-tunnelled endpoint without modifying source
-  code. Trailing slashes are stripped automatically.
+- **Automatic retries** — temporary failures (rate limits, server errors) are
+  retried for you.
 - **Typed object interfaces** — `PaymentObject`, `CustomerObject`,
   `TransferObject`, `RefundObject`, `InvoiceObject`, and the other domain
-  types are now exported from the package root so callers can annotate their
-  own variables without importing from internal paths.
-- **Auto-pagination `AsyncIterable`** — `PagedResult<T>` now implements
-  `[Symbol.asyncIterator]()`. Use `for await (const item of await
-  wajub.payments.list())` to stream all pages without manual
-  `getNextPage()` calls.
+  types are exported from the package root so you can annotate your own
+  variables.
+- **Auto-pagination** — `PagedResult<T>` is an `AsyncIterable`. Use
+  `for await (const item of await wajub.payments.list())` to walk every page
+  without calling `getNextPage()`.
 
 ### Fixed
-- **Error arrays preserved in full** — the `errors` field on `WajubError`
-  subclasses previously discarded all but the first validation message per
-  field. All messages are now kept as `string[]`, matching the shape the
-  Wajub API actually sends.
+- **Every validation message is kept** — the `errors` field of `WajubError`
+  kept only the first message per field. It now holds all of them, as
+  `string[]`.
 
 ---
 
 ## [1.0.0] — 2026-07-01
 
 ### Added
-- Initial release of `@wajub/node` — official server-side Wajub SDK for
-  Node.js 18+ and Edge runtimes.
-- `Wajub` class with typed resource accessors: `payments`, `customers`,
-  `refunds`, `transfers`, `beneficiaries`, `links`, `invoices`, `accounts`,
+- Initial release of `@wajub/node`, the server-side Wajub SDK for Node.js 18+
+  and Edge runtimes.
+- `Wajub` class with resource accessors: `payments`, `customers`, `refunds`,
+  `transfers`, `beneficiaries`, `links`, `invoices`, `accounts`,
   `webhookEndpoints`, `balance`, `events`, `disputes`, `identity`, `tax`,
-  `shield`, `listen`, `global`, `webhooks`.
-- `WebhooksResource.constructEvent()` — HMAC-SHA-256 signature verification
-  with timestamp replay-attack protection (configurable tolerance window).
-- `BaseClient` with `GET`, `POST`, `PUT`, `DELETE` helpers, auto-generated
-  `Idempotency-Key` headers for mutating requests, configurable timeout and
-  `fetchOptions` pass-through.
-- `createPagedList()` / `PagedResult<T>` for cursor-based list endpoints.
-- Full TypeScript support — strict types, no `any` in public API surface.
-- ESM-only build targeting Node.js 18 + modern Edge runtimes.
+  `shield`, `global`, `webhooks`.
+- `webhooks.constructEvent()` — webhook signature verification with a
+  configurable timestamp tolerance.
+- Your own idempotency key per call, a configurable timeout and `fetchOptions`.
+- `PagedResult<T>` for list methods.
+- Full TypeScript support — strict types, no `any` in the public API.
 
 [1.1.1]: https://github.com/wajubhq/wajub-node/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/wajubhq/wajub-node/compare/v1.0.0...v1.1.0
