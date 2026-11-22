@@ -1,0 +1,35 @@
+# Publishes @wajub/node to npm when a tag vX.Y.Z is pushed, through npm
+# trusted publishing (GitHub's OIDC token, with provenance): no npm token is
+# stored. One-time setup: npm trust github @wajub/node --repo wajubhq/wajub-node
+# --file publish.yml --environment npm --allow-publish
+name: Publish to npm
+
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Tag matches package.json
+        run: |
+          version=$(node -p "require('./package.json').version")
+          test "v$version" = "$GITHUB_REF_NAME" || { echo "package.json says $version, tag is $GITHUB_REF_NAME"; exit 1; }
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@^11.5.1
+      - run: npm ci
+      # The same checks as CI before anything is released.
+      - run: npm test
+      - run: npm run typecheck
+      - run: npm run build
+      - run: npm publish --access public
